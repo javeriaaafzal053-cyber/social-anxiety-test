@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Attentional Bias Tracking Task</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #f4f6f9; padding-top: 50px; }
+        #stimulus { font-size: 100px; margin: 40px; height: 120px; display: none; }
+        button { padding: 12px 30px; font-size: 18px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }
+        #results { margin-top: 30px; font-weight: bold; color: #333; }
+    </style>
+</head>
+<body>
+    <h2>Attentional Bias Testing Paradigm</h2>
+    <p>Press the button below when you see the threat stimulus (😠) appear on the screen.</p>
+    <button id="startBtn" onclick="runTrial()">Start Experiment Trial</button>
+    <div id="stimulus">😠</div>
+    <div id="results"></div>
+
+    <script>
+        let startTime, endTime;
+        function runTrial() {
+            document.getElementById("startBtn").style.display = "none";
+            document.getElementById("results").innerHTML = "Fixate on the center... waiting for stimulus...";
+            
+            // Random delay between 1.5 to 4 seconds to mimic laboratory baseline
+            let delay = Math.random() * (4000 - 1500) + 1500;
+            
+            setTimeout(() => {
+                document.getElementById("stimulus").style.display = "block";
+                startTime = performance.now(); // Highly accurate STEM timer
+                window.addEventListener("keydown", handleResponse);
+            }, delay);
+        }
+
+        function handleResponse(event) {
+            if (event.code === "Space") {
+                endTime = performance.now();
+                window.removeEventListener("keydown", handleResponse);
+                document.getElementById("stimulus").style.display = "none";
+                document.getElementById("startBtn").style.display = "inline-block";
+                
+                let reactionTime = (endTime - startTime).toFixed(2);
+                
+                // Artifact filtering loop for mechanical mistakes
+                if (reactionTime < 150) {
+                    document.getElementById("results").innerHTML = `Trial Flagged: Reaction time too fast (${reactionTime} ms). Unintentional mechanical press detected.`;
+                } else {
+                    document.getElementById("results").innerHTML = `Trial Complete! Latency: ${reactionTime} ms. This data maps attentional locking under threat conditions.`;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
